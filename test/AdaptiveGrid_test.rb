@@ -38,9 +38,12 @@ describe AdaptiveGrid do
 
     domain=[[0,1],[0,1]]
     ag=AdaptiveGrid.new(bounds:domain, eval_class: Linear1D_Evaluator, tol: 0.015625)
-    ag.refine_until_tolerance 0.015625
+    ag.refine_until_tolerance 0.0625
 
-    ag.leaves.size.must_equal 4096
+    ag.leaves.size.must_equal 256
+    ag.leaves.each do |lf|
+      lf.value.must_equal lf.center.first
+    end
   end
 
   it 'should create the right number of nodes for a 1D linear evaluator (second direction)' do
@@ -56,8 +59,11 @@ describe AdaptiveGrid do
 
     domain=[[0,1],[0,1]]
     ag=AdaptiveGrid.new(bounds:domain, eval_class: Linear1D_Evaluator, tol: 0.015625)
-    ag.refine_until_tolerance 0.015625
+    ag.refine_until_tolerance 0.0625
 
-    ag.leaves.size.must_equal 4096
+    ag.leaves.size.must_equal 256
+    ag.leaves.each do |lf|
+      lf.value.must_equal lf.center[1]
+    end
   end
 end

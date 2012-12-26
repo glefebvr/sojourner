@@ -80,20 +80,20 @@ class BoundingBox
    #
    ## Teste si deux boites s'intersectent
    # @param [BoundingBox] bbox Boite avec laquelle on veut tester
-   # @return [Boolean] Est-ce que les boites ont au moins un segment en commun
+   # @return [Boolean] Est-ce que les boites ont au moins un point en commun
    def intersects? bbox
      # Cas où la boite courante est plus petite que bbox
      inc_corners=0
      corners.each do |c|
        inc_corners+=1 if bbox.contains? c
-       return true if inc_corners >= 2
+       return true if inc_corners >= 1
      end
 
      # Cas où la boite courante est plus grande
      inc_corners=0
      bbox.corners.each do |c|
        inc_corners+=1 if self.contains? c
-       return true if inc_corners >= 2
+       return true if inc_corners >= 1
      end
 
      false

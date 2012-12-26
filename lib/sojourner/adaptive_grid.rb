@@ -12,9 +12,13 @@ class AdaptiveGrid
 
   def initialize(args={})
     bbox=BoundingBox.new(args.fetch(:bounds))
-    @root=Node.new(domain: bbox, evaluator_class: args.fetch(:eval_class),tol: args.fetch(:tol))
+    @root=Node.new(domain: bbox, evaluator_class: args.fetch(:eval_class))
     @root.subdivide
     @cached_leaves=@root.leaves
+  end
+
+  def leaves
+    @cached_leaves
   end
 
   def to_s
@@ -39,16 +43,15 @@ class AdaptiveGrid
   end
 
   def refine_until_tolerance tol
-    critical_leaves=@cached_leaves.keep_if { |lf| lf.is_critical? tol}
+    critical_leaves=@cached_leaves.select { |lf| lf.is_critical? tol}
 
     until critical_leaves.empty?
       refine_with_tolerance tol
 
-      critical_leaves=@cached_leaves.keep_if { |lf| lf.is_critical? tol}
+      critical_leaves=@cached_leaves.select { |lf| lf.is_critical? tol}
     end
 
   end
 
   attr_reader :root
-  def_delegators :@root, :leaves, :height
 end

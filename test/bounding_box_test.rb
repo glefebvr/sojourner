@@ -48,9 +48,17 @@ describe BoundingBox do
     bb_intersect=BoundingBox.new([[0.1,0.2],[1,3],[2,3],[4,5]])
 
     bb.intersects?(bb_intersect).must_equal true
+    bb_intersect.intersects?(bb).must_equal true
 
     bb_dnintersect=BoundingBox.new([[-1,-0.5],[-1,-0.4],[18,36],[1515,1517]])
     bb.intersects?(bb_dnintersect).must_equal false
+    bb_dnintersect.intersects?(bb).must_equal false
+  end
+
+  it 'should consider a point as an intersection' do
+    bb=BoundingBox.new([[0,1],[0,1]])
+    bb2=BoundingBox.new([[1,2],[1,2]])
+    bb.intersects?(bb2).must_equal true
   end
 
 end
