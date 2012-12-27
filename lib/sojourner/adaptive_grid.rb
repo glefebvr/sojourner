@@ -21,6 +21,15 @@ class AdaptiveGrid
     @cached_leaves
   end
 
+  def vertices
+    vx=[]
+
+    leaves.each do |lf|
+      vx << lf.corners
+    end
+    vx.flatten.uniq
+  end
+
   def to_s
     "#{root.height}\n"+root.to_s
   end
