@@ -19,7 +19,7 @@ describe AdaptiveGrid do
     end
 
     domain=[[0,1],[0,1]]
-    ag=AdaptiveGrid.new(bounds: domain, eval_class: Constant_Evaluator, tol: 1e-15)
+    ag=AdaptiveGrid.new(bounds: domain, eval_class: Constant_Evaluator)
 
     ag.size.must_equal 4
 
@@ -62,7 +62,7 @@ describe AdaptiveGrid do
     ag=AdaptiveGrid.new(bounds:domain, eval_class: Linear1D_Evaluator)
     ag.refine_until_tolerance 0.05
 
-    ag.save_as_polydata "grid"
+    ag.save_as_unstructured_grid "grid"
     #ag.leaves.size.must_equal 256
     ag.leaves.each do |lf|
       lf.value.must_equal lf.center[1]
