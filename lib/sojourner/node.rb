@@ -23,17 +23,14 @@ class Node
 
     fail "Node initialized without data !" unless @Eval_Class or @value
 
-    if parent
-      @depth=parent.depth+1
-    else
-      @depth=0
-    end
-    @children=Set.new
+    @depth=parent ? parent.depth+1 : 0
+
+    @children=args.fetch(:children) {Set.new}
     @connected=args.fetch(:connected) {Set.new}
   end
 
   # Délégation
-  def_delegators :@bbox, :center, :corner
+  def_delegators :@bbox, :center, :corner, :corners
   # Accesseurs
   attr_reader :parent, :value, :depth, :children, :bbox, :Eval_Class, :connected
 
@@ -58,22 +55,33 @@ class Node
     end
 
     # Remplissage de la liste des voisins pour chaque fils
-    self.children.each do |child|
-      child.compute_connected( self.children + self.connected)
+    candidates=children+connected
+    children.each do |child|
+      child.compute_connected( candidates)
     end
 
   end
 
+  def dist other_node
+    bbox.dist(other_node.bbox)
+  end
 
 
+  # Est-ce que le point est critiquue
   def is_critical? tol
-    connected.each do |vv|
-      next if vv.object_id==self.object_id
-      return true if (vv.value-value).abs > tol
-    end
-    false
+    (mean_value_over_connected-value).abs > tol
   end
 
+  def mean_value_over_connected
+    barycentre=0.0
+    poids=0.0
+    connected.each do |vv|
+      dd=(1.0/dist(vv))
+      poids+=dd
+      barycentre+=dd*vv.value
+    end
+    barycentre/=poids
+  end
 
 
   # Est-ce que la maille correspondant au nœud est connectée à l'argument?
