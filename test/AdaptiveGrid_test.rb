@@ -37,12 +37,13 @@ describe AdaptiveGrid do
     end
 
     domain=[[0,1],[0,1]]
-    ag=AdaptiveGrid.new(bounds:domain, eval_class: Linear1D_Evaluator, tol: 0.015625)
+    ag=AdaptiveGrid.new(bounds:domain, eval_class: Linear1D_Evaluator)
     ag.refine_until_tolerance 0.0625
 
-    ag.leaves.size.must_equal 256
+    #ag.leaves.size.must_equal 256
     ag.leaves.each do |lf|
       lf.value.must_equal lf.center.first
+      (lf.mean_value_over_connected-lf.value).abs.must_be :<=, 0.0625
     end
   end
 
@@ -57,13 +58,15 @@ describe AdaptiveGrid do
       end
     end
 
-    domain=[[0,1],[0,1]]
-    ag=AdaptiveGrid.new(bounds:domain, eval_class: Linear1D_Evaluator, tol: 0.015625)
-    ag.refine_until_tolerance 0.0625
+    domain=[[0,1],[0,1],[0,1]]
+    ag=AdaptiveGrid.new(bounds:domain, eval_class: Linear1D_Evaluator)
+    ag.refine_until_tolerance 0.05
 
-    ag.leaves.size.must_equal 256
+    ag.save_as_polydata "grid"
+    #ag.leaves.size.must_equal 256
     ag.leaves.each do |lf|
       lf.value.must_equal lf.center[1]
+      (lf.mean_value_over_connected-lf.value).abs.must_be :<=, 0.05
     end
   end
 end
