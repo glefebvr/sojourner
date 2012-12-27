@@ -31,7 +31,7 @@ class AdaptiveGrid
 
   def refine_with_tolerance tol
     new_leaves=[]
-    @cached_leaves.shuffle.each do |lf|
+    @cached_leaves.sort{|a,b| a.bbox.volume <=>b.bbox.volume}.reverse.each do |lf|
       if lf.is_critical? tol
         lf.subdivide
         lf.children.each { |c| new_leaves << c}

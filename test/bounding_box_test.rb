@@ -15,14 +15,14 @@ describe BoundingBox do
     bb=BoundingBox.new(@rect)
     origin=bb.origin
 
-    origin.must_equal [0,1,2,4]
+    origin.must_equal Point.new([0,1,2,4])
   end
 
   it 'should compute the center' do
     bb=BoundingBox.new(@rect)
     coords_center=bb.center
 
-    coords_center.must_equal [0.5,1.5,2.5,4.5]
+    coords_center.must_equal Point.new([0.5,1.5,2.5,4.5])
   end
 
   it 'should compute the lengths' do
@@ -35,10 +35,10 @@ describe BoundingBox do
   it 'should be able to check if a point is inside' do
     bb=BoundingBox.new(@rect)
 
-    pt_inside=[0.333, 1.1,2.9, 4.1515]
+    pt_inside=Point.new([0.333, 1.1,2.9, 4.1515])
     bb.contains?(pt_inside).must_equal true
 
-    pt_outside=[0.33,1.1, 3.1, 4.1515]
+    pt_outside=Point.new([0.33,1.1, 3.1, 4.1515])
     bb.contains?(pt_outside).must_equal false
   end
 
@@ -61,4 +61,31 @@ describe BoundingBox do
     bb.intersects?(bb2).must_equal true
   end
 
+  # Pour être compatible avec l'ordre VTK (http://www.vtk.org/VTK/img/file-formats.pdf)
+  it 'should order correctly the vertices (2D)' do
+    bb_2D=BoundingBox.new([[0,1],[0,1]])
+
+    corners=bb_2D.corners
+
+    corners[0].must_equal Point.new([0.0,0.0])
+    corners[1].must_equal Point.new([1.0,0.0])
+    corners[3].must_equal Point.new([1.0,1.0])
+    corners[2].must_equal Point.new([0.0,1.0])
+  end
+
+  # Pour être compatible avec l'ordre VTK (http://www.vtk.org/VTK/img/file-formats.pdf)
+  it 'should order correctly the vertices (3D)' do
+
+    bb_3D=BoundingBox.new([[0,1],[0,1],[0,1]])
+    corners=bb_3D.corners
+    corners[0].must_equal Point.new([0.0,0.0,0.0])
+    corners[1].must_equal Point.new([1.0,0.0,0.0])
+    corners[2].must_equal Point.new([0.0,1.0,0.0])
+    corners[3].must_equal Point.new([1.0,1.0,0.0])
+    corners[4].must_equal Point.new([0.0,0.0,1.0])
+    corners[5].must_equal Point.new([1.0,0.0,1.0])
+    corners[6].must_equal Point.new([0.0,1.0,1.0])
+    corners[7].must_equal Point.new([1.0,1.0,1.0])
+
+  end
 end

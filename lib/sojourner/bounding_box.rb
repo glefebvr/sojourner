@@ -1,6 +1,31 @@
 #encoding: utf-8
 require 'forwardable'
 
+class Point
+  extend Forwardable
+  include Enumerable
+
+  def initialize coords
+    @coords=coords
+  end
+
+  attr_reader :coords
+  def_delegators :@coords, :[], :[]=, :each
+
+  def to_s
+    coords.to_s
+  end
+
+  def == other_point
+    coords==other_point.coords
+  end
+
+  def dist other_point
+    square=coords.zip(other_point.coords).map{|a,b| (a-b)**2}.inject(&:+)
+    Math::sqrt(square)
+  end
+
+end
 ###########################################
 #
 #  Bounding box
@@ -13,19 +38,20 @@ class BoundingBox
     @bounds=rect
   end
 
+  attr_reader :bounds
   def_delegators :@bounds, :to_s, :size
 
 
   # Origine de la boite
-  # @return [Array<Float>] Coordonnées du coin inférieur de la boite
+  # @return [Point] Coordonnées du coin inférieur de la boite
   def origin
-    bounds.map{ |coord| coord[0]}
+    Point.new(bounds.map{ |coord| coord[0]})
   end
 
   # Centre de la boite
   # @return [Array<Float>] Coordonnées du centre de la boite
   def center
-    bounds.map{ |coord| (coord[0]+coord[1])/2.0}
+    Point.new(bounds.map{ |coord| (coord[0]+coord[1])/2.0})
   end
 
   # Longueurs de la boite
@@ -34,10 +60,15 @@ class BoundingBox
     bounds.map{ |coord| (coord[1]-coord[0]).abs}
   end
 
+  # Volume de la boite
+  # @return [Float] Volume de la boite
+  def volume
+    lengths.inject(&:*)
+  end
 
   # Coins
   # @param [FixNum] num Numéro du coin que l'on veut
-  # @return
+  # @return [Point] Le coin demandé
   def corner(num)
     shifts=[]
     cnum=num
@@ -46,7 +77,7 @@ class BoundingBox
       cnum=cnum/2
      end
     lshifts=self.lengths.zip(shifts).map {|a,b| a*b}
-    origin.zip(lshifts).map{|a,b| a+b}
+    Point.new(origin.zip(lshifts).map{|a,b| a+b})
    end
 
   # Nombre de coins de la boite
@@ -56,7 +87,7 @@ class BoundingBox
   end
 
   # Renvoie les coins
-  # @return [Array<Array<Float>>] Coordonnées des coins
+  # @return [Array<Point>] Coordonnées des coins
   def corners
     cc=[]
 
@@ -66,9 +97,17 @@ class BoundingBox
     cc
   end
 
+  # Renvoie les faces (2D ou 3D seulement)
+  # @param [Array<Array<FixNum>>] Tableau des indices de coins composant les faces
+  def faces
+    return [[0,1,3,2]] if size==2
+    return [[0,1,3,2], [0,1,5,4], [0,2,6,4], [4,5,7,6],[2,3,7,6],[1,3,7,5]] if size==3
+    fail "Numérotation des faces non implémentée en dim > 3"
+  end
+
   #
   ## Teste si un point est dans la boite
-  # @param [Array<Float>] coords Point à tester
+  # @param [Point] coords Point à tester
   # @return [Boolean] Est-ce que la boite contient le point?
   def contains? coords
     bounds.zip(coords) { |b,c|
@@ -115,7 +154,7 @@ class BoundingBox
        cnum=cnum/2
      end
      lshifts=lengths.zip(shifts).map {|a,b| 0.5*a*b}
-     new_center=seed_coords.zip(lshifts).map{ |a,b| a+b}
+     new_center=Point.new(seed_coords.zip(lshifts).map{ |a,b| a+b})
      new_bounds=[]
      pos=0
      new_center.each { |cc|
@@ -124,5 +163,8 @@ class BoundingBox
      }
      BoundingBox.new(new_bounds)
    end
-   attr_reader :bounds
-   end
+
+  def dist other_box
+    center.dist(other_box.center)
+  end
+end
