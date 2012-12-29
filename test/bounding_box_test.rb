@@ -32,6 +32,11 @@ describe BoundingBox do
     lengths.must_equal [1,2,3]
   end
 
+  it 'should compute tne number of corners' do
+    bb=BoundingBox.new(@rect)
+    bb.num_corners.must_equal 16
+  end
+
   it 'should be able to check if a point is inside' do
     bb=BoundingBox.new(@rect)
 
