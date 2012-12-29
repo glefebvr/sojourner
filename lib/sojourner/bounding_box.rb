@@ -36,66 +36,18 @@ class BoundingBox
 
   def initialize(rect)
     @bounds=rect
+    @origin=Point.new(bounds.map{ |coord| coord[0]})
+    @center=Point.new(bounds.map{ |coord| (coord[0]+coord[1])/2.0})
+    @lengths=bounds.map{ |coord| (coord[1]-coord[0]).abs}
+    @num_corners=2**rect.size
+    @corners=(0..num_corners-1).map {|x| corner(x)}
+    @volume=lengths.inject(&:*)
   end
 
-  attr_reader :bounds
+  attr_reader :bounds, :origin, :center, :corners, :lengths, :volume, :num_corners
   def_delegators :@bounds, :to_s, :size
 
 
-  # Origine de la boite
-  # @return [Point] Coordonnées du coin inférieur de la boite
-  def origin
-    Point.new(bounds.map{ |coord| coord[0]})
-  end
-
-  # Centre de la boite
-  # @return [Array<Float>] Coordonnées du centre de la boite
-  def center
-    Point.new(bounds.map{ |coord| (coord[0]+coord[1])/2.0})
-  end
-
-  # Longueurs de la boite
-  # @return [Array<Float>] Longueurs des arêtes
-  def lengths
-    bounds.map{ |coord| (coord[1]-coord[0]).abs}
-  end
-
-  # Volume de la boite
-  # @return [Float] Volume de la boite
-  def volume
-    lengths.inject(&:*)
-  end
-
-  # Coins
-  # @param [FixNum] num Numéro du coin que l'on veut
-  # @return [Point] Le coin demandé
-  def corner(num)
-    shifts=[]
-    cnum=num
-    (0..size-1).each do |dim|
-      shifts << cnum.modulo(2)
-      cnum=cnum/2
-     end
-    lshifts=self.lengths.zip(shifts).map {|a,b| a*b}
-    Point.new(origin.zip(lshifts).map{|a,b| a+b})
-   end
-
-  # Nombre de coins de la boite
-  # @return [FixNum]
-  def num_corners
-    2**size
-  end
-
-  # Renvoie les coins
-  # @return [Array<Point>] Coordonnées des coins
-  def corners
-    cc=[]
-
-    (0..num_corners-1).each do |i|
-      cc << corner(i)
-    end
-    cc
-  end
 
   # Renvoie les faces (2D ou 3D seulement)
   # @param [Array<Array<FixNum>>] Tableau des indices de coins composant les faces
@@ -167,4 +119,19 @@ class BoundingBox
   def dist other_box
     center.dist(other_box.center)
   end
+
+  private
+  # Coins
+  # @param [FixNum] num Numéro du coin que l'on veut
+  # @return [Point] Le coin demandé
+  def corner(num)
+    shifts=[]
+    cnum=num
+    (0..size-1).each do |dim|
+      shifts << cnum.modulo(2)
+      cnum=cnum/2
+     end
+    lshifts=self.lengths.zip(shifts).map {|x| x.reduce(:*)}
+    Point.new(origin.zip(lshifts).map{|x| x.reduce(:+)})
+   end
 end

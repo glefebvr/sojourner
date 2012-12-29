@@ -26,10 +26,10 @@ describe BoundingBox do
   end
 
   it 'should compute the lengths' do
-    bb=BoundingBox.new(@rect)
+    bb=BoundingBox.new([[0,1],[1,3],[5,8]])
     lengths=bb.lengths
 
-    lengths.must_equal [1,1,1,1]
+    lengths.must_equal [1,2,3]
   end
 
   it 'should be able to check if a point is inside' do
