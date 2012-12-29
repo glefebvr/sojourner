@@ -3,6 +3,15 @@ require 'forwardable'
 require 'set'
 
 
+require 'celluloid'
+
+module Enumerable
+  # Simple parallel map using Celluloid::Futures
+  def pmap(&block)
+    futures = map { |elem| Celluloid::Future.new(elem, &block) }
+    futures.map { |future| future.value }
+  end
+end
 
 ###########################################
 #
@@ -40,14 +49,14 @@ class Node
   def subdivide
     return if depth > 5
 
-    (0..2**(bbox.size)-1).each do |i|
+    # Parallel map using celluloid
+    kids=(0..2**(bbox.size)-1).pmap do |i|
       small_box=bbox.divide(i)
       args=@args.dup.merge({parent: self, domain: small_box})
 
-      new_born=Node.new(args)
-
-      add_child new_born
+      Node.new(args)
     end
+    @children=Set.new kids
 
     # Mise à jour des nœuds des mailles voisines
     connected.each do |cn|
