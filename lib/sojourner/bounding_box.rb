@@ -40,13 +40,21 @@ class BoundingBox
     @center=Point.new(bounds.map{ |coord| (coord[0]+coord[1])/2.0})
     @lengths=bounds.map{ |coord| (coord[1]-coord[0]).abs}
     @num_corners=2**rect.size
+    @shifts=(0..num_corners-1).map do |num|
+        loc_shift=[]
+        cnum=num
+        (0..size-1).each do |dim|
+        loc_shift << cnum.modulo(2)
+        cnum=cnum/2
+        end
+        loc_shift
+    end
     @corners=(0..num_corners-1).map {|x| corner(x)}
     @volume=lengths.inject(&:*)
   end
 
-  attr_reader :bounds, :origin, :center, :corners, :lengths, :volume, :num_corners
+  attr_reader :bounds, :origin, :center, :corners, :lengths, :volume, :num_corners, :shifts
   def_delegators :@bounds, :to_s, :size
-
 
 
   # Renvoie les faces (2D ou 3D seulement)
@@ -98,14 +106,7 @@ class BoundingBox
      side_lengths=lengths.map{ |d| 0.25*d}
      seed_coords=origin.zip(side_lengths).map{|x,l| x+l}
 
-     # On se déplace pour obtenir le centre du domaine recherché
-     shifts=[]
-     cnum=num
-     (0..size-1).each do |dim|
-       shifts << cnum.modulo(2)
-       cnum=cnum/2
-     end
-     lshifts=lengths.zip(shifts).map {|a,b| 0.5*a*b}
+     lshifts=lengths.zip(shifts[num]).map {|a,b| 0.5*a*b}
      new_center=Point.new(seed_coords.zip(lshifts).map{ |a,b| a+b})
      new_bounds=[]
      pos=0
@@ -124,14 +125,9 @@ class BoundingBox
   # Coins
   # @param [FixNum] num Numéro du coin que l'on veut
   # @return [Point] Le coin demandé
-  def corner(num)
-    shifts=[]
-    cnum=num
-    (0..size-1).each do |dim|
-      shifts << cnum.modulo(2)
-      cnum=cnum/2
-     end
-    lshifts=self.lengths.zip(shifts).map {|x| x.reduce(:*)}
+  def corner num
+
+    lshifts=self.lengths.zip(shifts[num]).map {|x| x.reduce(:*)}
     Point.new(origin.zip(lshifts).map{|x| x.reduce(:+)})
    end
 end
