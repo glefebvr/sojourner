@@ -29,7 +29,18 @@ module DiskWriter
       end
     end
 
+    def save_as_1D fname
+      File.open("#{fname}.txt",File::CREAT | File::TRUNC | File::WRONLY) do |pfi|
+        leaves.each do |nn|
+          pfi.puts "#{nn.center[0]}\t#{nn.value}"
+        end
+      end
+    end
+
     def save_as_unstructured_grid(fname)
+
+      return save_as_1D(fname) if root.bbox.size==1
+
       File.open("#{fname}.vtk",File::CREAT | File::TRUNC | File::WRONLY) do |pfi|
         name=File.basename(fname)
 
