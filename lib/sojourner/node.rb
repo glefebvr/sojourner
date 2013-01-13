@@ -3,16 +3,6 @@ require 'forwardable'
 require 'set'
 
 
-require 'celluloid'
-
-module Enumerable
-  # Simple parallel map using Celluloid::Futures
-  def pmap(&block)
-    futures = map { |elem| Celluloid::Future.new(elem, &block) }
-    futures.map { |future| future.value }
-  end
-end
-
 ###########################################
 #
 #  Nœud de l'arbre
@@ -50,11 +40,15 @@ class Node
     return if depth > 5
 
     # Parallel map using celluloid
-    kids=(0..2**(bbox.size)-1).pmap do |i|
+    kids_th=(0..2**(bbox.size)-1).map do |i|
       small_box=bbox.divide(i)
-      args=@args.dup.merge({parent: self, domain: small_box})
-
-      Node.new(args)
+      Thread.new {
+        args=@args.dup.merge({parent: self, domain: small_box})
+        Node.new(args)
+      }
+    end
+    kids=kids_th.map do |th|
+      th.value
     end
     @children=Set.new kids
 
