@@ -8,7 +8,7 @@ task :default=>:test
 
 # Documentation
 YARD::Rake::YardocTask.new do |t|
-  t.files   = ['lib/**/*.rb', "GIST.rb"]
+  t.files   = ['lib/**/*.rb']
 end
 task :doc => :yard
 
