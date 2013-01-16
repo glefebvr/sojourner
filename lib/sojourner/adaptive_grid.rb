@@ -15,7 +15,10 @@ class AdaptiveGrid
     @root=Node.new(domain: bbox, evaluator_class: args.fetch(:eval_class))
     @root.subdivide
     @cached_leaves=@root.leaves
+    @max_depth=args.fetch(:max_depth) { 10 }
   end
+
+    attr_reader :root, :max_depth
 
   def leaves
     @cached_leaves
@@ -41,7 +44,7 @@ class AdaptiveGrid
   def refine_with_tolerance tol
     new_leaves=[]
     @cached_leaves.sort{|a,b| a.bbox.volume <=>b.bbox.volume}.reverse.each do |lf|
-      if lf.is_critical? tol
+      if (lf.is_critical? tol ) && (lf.depth< max_depth)
         lf.subdivide
         lf.children.each { |c| new_leaves << c}
       else
@@ -52,15 +55,15 @@ class AdaptiveGrid
   end
 
   def refine_until_tolerance tol
-    critical_leaves=@cached_leaves.select { |lf| lf.is_critical? tol}
+    critical_leaves=@cached_leaves.select { |lf| (lf.is_critical? tol)&& (lf.depth< max_depth)}
 
     until critical_leaves.empty?
+      puts "Refinement : #{critical_leaves.size} leaves left."
       refine_with_tolerance tol
 
-      critical_leaves=@cached_leaves.select { |lf| lf.is_critical? tol}
+      critical_leaves=@cached_leaves.select { |lf| (lf.is_critical? tol)&& (lf.depth< max_depth)}
     end
 
   end
 
-  attr_reader :root
 end
