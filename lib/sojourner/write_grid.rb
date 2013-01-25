@@ -52,6 +52,7 @@ module DiskWriter
         nodes.each { |n|
           coins += n.corners
         }
+        coins.uniq!
 
         # Création de l'entête
         pfi.puts "# vtk DataFile Version 3.0\n#{name}\nASCII\nDATASET UNSTRUCTURED_GRID"
