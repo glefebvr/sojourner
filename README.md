@@ -1,5 +1,7 @@
 Sojourner
 =========
+[![Build Status](https://secure.travis-ci.org/osaut/sojourner.png?branch=master)](http://travis-ci.org/osaut/sojourner)
+
 (c) 2012 Olivier Saut <osaut@airpost.net>
 
 
